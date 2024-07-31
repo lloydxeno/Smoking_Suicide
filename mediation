@@ -1,0 +1,75 @@
+
+library(mice)
+library(mitools)
+library(medflex)
+
+cchs_males$Marstat <- as.factor(cchs_males$Marstat)
+cchs_males_imp <- mice(cchs_males, m=5)
+expdata <- with(cchs_males_imp, neImpute(suic_death ~ ever_daily_smoker*any_mh 
+          + self_rtd_hlth + FN_Met_Int + lowinc +
+          factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+          foreign_born + regular_drk + postsec_compl +
+          consid_suic_lf, family = binomial("logit")))
+save.image("P:/Proj-19-SSH-SKY-5931_Balbuena_Sharker/WORK/Data/Analysis/cchs_med_interac_test_males_feb5.RData")
+
+expdata <- imputationList(expdata$analyses)
+males_mod <- with(expdata, neModel(suic_death ~ ever_daily_smoker0*ever_daily_smoker1 +
+            self_rtd_hlth + FN_Met_Int + lowinc +
+            factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+            foreign_born + regular_drk + postsec_compl +
+            consid_suic_lf, family = "binomial", se="robust"))
+save.image("P:/Proj-19-SSH-SKY-5931_Balbuena_Sharker/WORK/Data/Analysis/cchs_med_interac_test_males_feb5.RData")
+summary(MIcombine(males_mod))
+exp(coef(MIcombine(males_mod)))
+exp(confint(MIcombine(males_mod)))
+
+summary(neEffdecomp(males_mod[[1]]))
+
+##########Females########
+library(haven)
+
+#Add DHH_AGE as well
+setwd("P:/Proj-19-SSH-SKY-5931_Balbuena_Sharker/WORK/Data/Analysis")
+
+cchsdat <- read_dta("cchs1_1_2014_suic_deaths_for_CMA.dta")
+cchsdat <- zap_formats(cchsdat)
+cchsdat <- zap_label(cchsdat)
+cchsdat <- zap_labels(cchsdat)
+
+cchs_females <- cchsdat[cchsdat$male==0,]
+cchs_ages<- read_dta("cchs_male_ages.dta")
+cchs_ages <- zap_formats(cchs_ages)
+cchs_ages <- zap_label(cchs_ages)
+cchs_ages <- zap_labels(cchs_ages)
+
+cchs_ages <- cchs_ages[cchs_ages$male==0,]
+
+cchs_females <- merge(cchs_females, cchs_ages[,-2])
+cchs_females$non_binary <- NULL
+cchs_females$'_merge' <- NULL
+
+library(mice)
+library(mitools)
+library(medflex)
+
+cchs_females$Marstat <- as.factor(cchs_females$Marstat)
+cchs_females_imp <- mice(cchs_females, m=5)
+
+expdata <- with(cchs_females_imp, neImpute(suic_death ~ ever_daily_smoker*any_mh 
+                                         + self_rtd_hlth + FN_Met_Int + lowinc +
+                                           factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+                                           foreign_born + regular_drk + postsec_compl +
+                                           consid_suic_lf, family = binomial("logit")))
+expdata <- imputationList(expdata$analyses)
+females_mod <- with(expdata, neModel(suic_death ~ ever_daily_smoker0*ever_daily_smoker1 +
+                                     self_rtd_hlth + FN_Met_Int + lowinc +
+                                     factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+                                     foreign_born + regular_drk + postsec_compl +
+                                     consid_suic_lf, family = "binomial", se="robust"))
+
+save.image("P:/Proj-19-SSH-SKY-5931_Balbuena_Sharker/WORK/Data/Analysis/cchs_med_interac_test_females_feb5.RData")
+summary(MIcombine(females_mod))
+exp(coef(MIcombine(females_mod)))
+exp(confint(MIcombine(females_mod)))
+
+summary(neEffdecomp(females_mod[[1]]))

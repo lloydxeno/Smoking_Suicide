@@ -1,0 +1,57 @@
+
+**************************************************
+*Calculation of Descriptive Stats
+**************************************************
+//Income
+tab lowinc male, col missing
+svy bootstrap, mse: tab lowinc male, col missing se ci cv percent
+
+//Aboriginal Status
+tab FN_Met_Int male, col miss
+svy bootstrap, mse: tab FN_Met_Int male, col missing se ci cv percent
+
+
+//Gender
+tab non_binary male, col missing
+svy bootstrap, mse: tab non_binary male, col missing se ci cv percent
+
+//Smoking status
+ tab ever_daily_smoker male, col miss
+svy bootstrap, mse: tab ever_daily_smoker male, col missing se ci cv percent
+
+//Marital Status
+tab Marstat male, col missing
+svy bootstrap, mse: tab Marstat male, col missing se ci cv percent
+
+//Has children below 12 (DHHDL12)
+tab Has_kiddies male, col miss
+svy bootstrap, mse: tab Has_kiddies male, col missing se ci cv percent
+
+//Self-rated health
+bysort male: summ self_rtd_hl
+svy bootstrap if male==0, mse: mean self_rtd_hlth
+svy bootstrap if male==1, mse: mean self_rtd_hlth
+
+//foreign born
+tab foreign male, col missing
+svy bootstrap, mse: tab foreign male, col missing se ci cv percent
+
+//Regular drinker last 12 months
+tab regular_drk male, col miss
+svy bootstrap, mse: tab regular_drk male, col missing se ci cv percent
+
+//Worked in previous year
+tab work male, col miss
+svy bootstrap, mse: tab work male, col missing se ci cv percent
+
+//Completed postsec certificate or higher
+tab postsec_compl male, col miss
+svy bootstrap, mse: tab postsec_compl male, col missing se ci cv percent
+
+//Considered suicide (lifetime)
+tab consid_suic_lf male, col miss
+svy bootstrap, mse: tab consid_suic_lf male, col missing se ci cv percent
+
+//Suicide death
+tab suic_death male, col miss
+svy bootstrap, mse: tab suic_death male, col missing se ci cv percent

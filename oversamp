@@ -1,0 +1,120 @@
+library(ROSE)
+setwd("P:/Proj-19-SSH-SKY-5931_Balbuena_Sharker/WORK/Data/Analysis")
+load("cchs_males_PAF.RData")
+#Now work first with Males data
+#Oversample the suicides to various proportions
+#Actual: 
+#1: 0.01
+#2: 0.02
+#3: 0.06
+#4: 0.08
+#5: 0.1
+
+#remove wts_sdle
+save.image("cchs_males_PAF_Rose.RData")
+
+
+cchs_males_clean <- cchs_males_clean[,-15]
+
+cchs_males_p01 <- ovun.sample(suic_death ~ ., 
+                              data=cchs_males_clean,
+                              method = "both",
+                              seed = 123,
+                              N = ,
+                              p=0.01)$data
+
+#Save each proportion in a different file
+save.image("males_01pct_Rose.RData")
+
+cchs_males_p02 <- ovun.sample(suic_death ~ ., 
+                              data=cchs_males_clean,
+                              method = "both",
+                              seed = 123,
+                              N = ,
+                              p=0.02)$data
+rm(cchs_males_clean)
+save.image("males_02pct_Rose.RData") 
+
+cchs_males_p06 <- ovun.sample(suic_death ~ ., 
+                              data=cchs_males_clean,
+                              method = "both",
+                              seed = 123,
+                              N = ,
+                              p=0.06)$data
+rm(cchs_males_clean)
+save.image("males_06pct_Rose.RData") 
+
+cchs_males_p08 <- ovun.sample(suic_death ~ ., 
+                              data=cchs_males_clean,
+                              method = "both",
+                              seed = 123,
+                              N = ,
+                              p=0.08)$data
+rm(cchs_males_clean)
+save.image("males_08pct_Rose.RData") 
+
+cchs_males_p10 <- ovun.sample(suic_death ~ ., 
+                              data=cchs_males_clean,
+                              method = "both",
+                              seed = 123,
+                              N = ,
+                              p=0.10)$data
+rm(cchs_males_clean)
+save.image("males_10pct_Rose.RData") 
+
+###############Now do the same for females##############
+load("cchs_females_PAF.RData")
+
+rm(females_paf, mediat_mod, suic_mod)
+
+save.image("cchs_females_PAF_Rose.RData")
+
+load("cchs_females_PAF_Rose.RData")
+cchs_females_p01 <- ovun.sample(suic_death ~ ., 
+                                data=cchs_females_clean,
+                                method = "both",
+                                seed = 123,
+                                N = ,
+                                p=0.01)$data
+rm(cchs_females_clean)
+save.image("females_01pct_Rose.RData")
+rm(list = ls())
+load("cchs_females_PAF_Rose.RData")
+cchs_females_p02 <- ovun.sample(suic_death ~ ., 
+                                data=cchs_females_clean,
+                                method = "both",
+                                seed = 123,
+                                N = 290718,
+                                p=0.02)$data
+rm(cchs_females_clean)
+save.image("females_02pct_Rose.RData")
+load("cchs_females_PAF_Rose.RData")
+cchs_females_p06 <- ovun.sample(suic_death ~ ., 
+                                data=cchs_females_clean,
+                                method = "both",
+                                seed = 123,
+                                N = ,
+                                p=0.06)$data
+rm(cchs_females_clean)
+save.image("females_06pct_Rose.RData") 
+rm(list=ls())
+load("cchs_females_PAF_Rose.RData")
+cchs_females_p08 <- ovun.sample(suic_death ~ ., 
+                                data=cchs_females_clean,
+                                method = "both",
+                                seed = 123,
+                                N = ,
+                                p=0.08)$data
+rm(cchs_females_clean)
+save.image("females_08pct_Rose.RData") 
+rm(list=ls())
+load("cchs_females_PAF_Rose.RData")
+cchs_females_p10 <- ovun.sample(suic_death ~ ., 
+                                data=cchs_females_clean,
+                                method = "both",
+                                seed = 123,
+                                N = ,
+                                p=0.10)$data
+rm(cchs_females_clean)
+save.image("females_10pct_Rose.RData")
+

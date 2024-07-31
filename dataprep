@@ -1,0 +1,249 @@
+**************************************************
+*Coding of Mental Disorders
+**************************************************
+//Substance misuse (F10-F19)
+foreach var of varlist Dx1- Dx12 {
+ gen subst`var'temp = regexm(`var', "(^F1+)([0-9]+)")
+ replace subst`var'temp = 1 if subst`var'temp==0 & regexm(`var', "(^F1+)([0-9]+)")
+ }
+ egen subst_combined = rmax(substDx1temp-substDx12temp)
+ drop substDx1temp-substDx12temp
+ 
+ //Depression (F32-F39)
+ foreach var of varlist Dx1- Dx12 {
+ gen dep`var'temp = regexm(`var', "(^F3+)([2-9]+)")
+ replace dep`var'temp = 1 if dep`var'temp==0 & regexm(`var', "(^F3+)([2-9]+)")
+ }
+ egen dep_combined = rmax(depDx1temp-depDx12temp)
+ drop depDx1temp-depDx12temp
+ 
+ //Anxiety (F40-F49)
+ foreach var of varlist Dx1- Dx12 {
+ gen anx`var'temp = regexm(`var', "(^F4+)([0-9]+)")
+ replace anx`var'temp = 1 if anx`var'temp==0 & regexm(`var', "(^F4+)([0-9]+)")
+ }
+ egen anx_combined = rmax(anxDx1temp-anxDx12temp)
+ drop anxDx1temp-anxDx12temp
+ 
+  //Schizophrenia and related(F20-F29)
+ foreach var of varlist Dx1- Dx12 {
+ gen schiz`var'temp = regexm(`var', "(^F2+)([0-9]+)")
+ replace schiz`var'temp = 1 if schiz`var'temp==0 & regexm(`var', "(^F2+)([0-9]+)")
+ }
+ egen schiz_combined = rmax(schizDx1temp-schizDx12temp)
+ drop schizDx1temp-schizDx12temp
+ 
+ //Mania (F30-F31)
+ foreach var of varlist Dx1- Dx12 {
+ gen mania`var'temp = regexm(`var', "(^F3+)([0-1]+)")
+ replace mania`var'temp = 1 if mania`var'temp==0 & regexm(`var', "(^F3+)([0-1]+)")
+ }
+ egen mania_combined = rmax(maniaDx1temp-maniaDx12temp)
+ drop maniaDx1temp-maniaDx12temp
+ 
+  //All self-harm combined
+ foreach var of varlist Dx1- Dx12 {
+ gen sharm_any`var'temp = regexm(`var', "(^X[6-7]+)([0-9]+)")
+ replace sharm_any`var'temp = 1 if sharm_any`var'temp==0 & regexm(`var', "(^X8+)([0-4]+)")
+ }
+ egen sharm_any_combined = rmax(sharm_anyDx1temp- sharm_anyDx12temp)
+ drop sharm_anyDx1temp- sharm_anyDx12temp
+
+**************************************************
+* Loop through the Diagnosis Variables in DAD
+**************************************************
+ 
+ //Self-harm
+ foreach var of varlist DIAG_CODE_1 DIAG_CODE_2 DIAG_CODE_3 DIAG_CODE_4 DIAG_TYPE_5 DIAG_CODE_6 DIAG_CODE_7 DIAG_CODE_8 DIAG_CODE_9 DIAG_CODE_10 DIAG_CODE_11 DIAG_CODE_12 DIAG_CODE_13 DIAG_CODE_14 DIAG_CODE_15 DIAG_CODE_16{
+ gen sharm_any`var'temp = regexm(`var', "(^X[6-7]+)([0-9]+)")
+ replace sharm_any`var'temp = 1 if sharm_any`var'temp==0 & regexm(`var', "(^X8+)([0-4]+)")
+ }
+ egen sharm = rmax(sharm_anyDIAG_CODE_1temp- sharm_anyDIAG_CODE_16temp)
+ drop sharm_anyDIAG_CODE_1temp- sharm_anyDIAG_CODE_16temp
+ 
+**************************************************
+* Loop through the Diagnosis Variables in NACRS
+**************************************************
+ 
+  
+//Substance misuse (F10-F19)
+foreach var of varlist MAIN_PROBLEM OTHER_PROBLEM_1 OTHER_PROBLEM_2 OTHER_PROBLEM_3 OTHER_PROBLEM_4 OTHER_PROBLEM_5 OTHER_PROBLEM_6 OTHER_PROBLEM_7 OTHER_PROBLEM_8 OTHER_PROBLEM_9 {
+ gen subst`var'temp = regexm(`var', "(^F1+)([0-9]+)")
+ replace subst`var'temp = 1 if subst`var'temp==0 & regexm(`var', "(^F1+)([0-9]+)")
+ }
+ egen subst_combined = rmax(substMAIN_PROBLEMtemp- substOTHER_PROBLEM_9temp)
+ drop substMAIN_PROBLEMtemp- substOTHER_PROBLEM_9temp
+ 
+ 
+  
+**************************************************
+* Survey design and scaling of weights
+**************************************************
+//Survey design
+svyset STC_ID [pweight = wts_sdle], bsrweight(bsw1-bsw500) vce(bootstrap) mse singleunit(missing)
+
+//Scale the weights dividing by the number of waves combined
+replace wts_sdle = wts_sdle/11
+//Now scale the bootstrap weights dividing by 11 cycles
+//following Thomas and Wannell
+foreach var of varlist bsw1-bsw500{
+	replace `var' = `var'/11
+
+}
+
+
+
+
+**************************************************
+*Creation of Suicide Death variable from CVSD
+
+**************************************************
+gen suic_death = regexm(death_cause_4digits, "(^X[6-7]+)([0-9]+)")
+replace suic_death = 1 if suic_death==0 & regexm(death_cause_4digits, "(^X8+)([0-4]+)")
+
+**************************************************
+*Harmonize First Nations and Metis Variables
+**************************************************
+
+//Harmonize the ethnicity codes wave by wave
+gen FN_Met_Int = 1 if SDC_41==1
+replace FN_Met_Int = 1 if SDCC_4W==1
+replace FN_Met_Int = 1 if SDCE_4P==1 | SDCE_4Q ==1 | SDCE_4R ==1
+replace FN_Met_Int = 1 if SDC_4T==1 | SDC_4U ==1 | SDC_4V ==1
+replace FN_Met_Int = 1 if SDC_4P==1 | SDC_4Q ==1 | SDC_4R==1
+
+//Make sure the "not valid" and "skip" answers are coded as missing
+//waves 2010 - 2014
+egen FNmax = rmax(SDC_4P SDC_4Q SDC_4R)
+//Not FN
+replace FN_Met_Int = 0 if FNmax==2 & FN_Met_Int==.
+replace FN_Met_Int = . if FNmax > 2 & FN_Met_Int==.
+
+//waves 2007-2009
+egen FNmax = rmax(SDC_4T SDC_4U SDC_4V)
+replace FN_Met_Int = 0 if FNmax==2 & FN_Met_Int==.
+replace FN_Met_Int = . if FNmax > 2 & FN_Met_Int==.
+
+//waves 2_1 to 3_1
+egen FNmax = rmax(SDCE_4P SDCE_4Q SDCE_4R SDCC_4W)
+replace FN_Met_Int = 0 if FNmax==2 & FN_Met_Int==.
+replace FN_Met_Int = . if FNmax > 2 & FN_Met_Int==.
+
+//1_1
+replace FN_Met_Int = 0 if SDCA_4P==2 & FN_Met_Int==.
+replace FN_Met_Int = . if SDCA_4P >2 & FN_Met_Int==.
+
+
+**************************************************
+*Calculation of Low Income Thresholds per wave
+**************************************************
+//3_1
+*Note that INCDADR should be betrween 0 and 1
+
+replace INCDADR = . if INCDADR > 1
+pctile inc_pct = INCDADR, nq(8) genp(perctiles)
+recode INCDADR (.=.) (0/=1) (0/1=0), gen(lowinc)
+
+//Now work recode INCOME by year for 2007 onwards
+use "P:\Proj-19-SSH-SKY-5931_Balbuena_Sharker\WORK\Data\temp_inc_2007_2014.dta"
+
+//2007
+ _pctile INCDADR if yr==2007, p(10.3)  //
+ return list
+recode INCDADR (.=.) (0/=1) (/1=0) if yr==2007, gen(lowinc)
+
+//2008
+ _pctile INCDADR if yr==2008, p(9.70)  //
+return list
+replace lowinc = 1 if INCDADR <= & yr==2008
+replace lowinc = 0 if INCDADR >  & yr==2008 & INCDADR < .
+
+//2009
+ _pctile INCDADR if yr==2009, p(10.1)  //
+return list
+replace lowinc = 1 if INCDADR <= & yr==2009
+replace lowinc = 0 if INCDADR >  & yr==2009 & INCDADR < .
+
+//2010
+ _pctile INCDADR if yr==2010, p(9.60)  //
+return list
+replace lowinc = 1 if INCDADR <= & yr==2010
+replace lowinc = 0 if INCDADR >  & yr==2010 & INCDADR < .
+
+//2011
+ _pctile INCDADR if yr==2011, p(9.60)  //
+return list
+replace lowinc = 1 if INCDADR <=  yr==2011
+replace lowinc = 0 if INCDADR >  & yr==2011 & INCDADR < .
+
+//2012
+ _pctile INCDADR if yr==2012, p(10)  //
+return list
+replace lowinc = 1 if INCDADR <=  & yr==2012
+replace lowinc = 0 if INCDADR >  & yr==2012 & INCDADR < .
+
+//2013
+ _pctile INCDADR if yr==2013, p(9.8)  //
+return list
+replace lowinc = 1 if INCDADR <= & yr==2013
+replace lowinc = 0 if INCDADR >  & yr==2013 & INCDADR < .
+
+//2014
+ _pctile INCDADR if yr==2014, p(8.8)  // 
+return list
+replace lowinc = 1 if INCDADR <=  & yr==2014
+replace lowinc = 0 if INCDADR >   & yr==2014 & INCDADR < .
+
+*Now work on the 1_1 and 2_1
+gen lowinc = 1 if INCADIA2==1
+replace lowinc = 0 if INCADIA2==2
+replace lowinc = . if INCADIA2==9
+
+***********************************************
+*Non-binary gender
+***********************************************
+recode SDCC_7AA (1=0) (2/3=1) (else=.), gen(non_binary)
+
+
+***********************************************
+*Harmonize ever daily smoking
+***********************************************
+
+
+gen ever_daily_smoker = 1 if SMK_05D==1
+replace ever_daily_smoker = 0 if SMK_05D ==2
+replace ever_daily_smoker = 0 if inlist(SMKDSTY,2,3,5,6)
+replace ever_daily_smoker = 1 if inlist(SMKDSTY,1,4) & ever_daily==.
+
+***********************************************
+*Considered suicide (lifetime)
+***********************************************
+recode SUI_1 (1=1) (else=0), gen(consid_suic_lf)
+
+***********************************************
+*Foreign Born
+***********************************************
+recode SDC_3 (1902/2014=1) (else=0), gen(foreign_born)
+
+
+***********************************************
+*Temporal Indicator for Smoking and Mental Health
+***********************************************
+
+//these are indicator variables
+gen mh_b4_smk = 1 if mh_onset < age_smk_init & age_smk_init <.
+gen smk_b4_mh = 1 if age_smk_init < mh_onset & mh_onset < .
+
+gen smk_mh_simul = 1 if age_smk_init == mh_onset_age & age_smk_init < .
+
+*filter those whose mental hospitalization came simultaneously or before smoking
+
+gen exclude = 1 if smk_mh_simul==1 | mh_b4_smk==1
+replace exclude = 0 if exclude==.
+
+*Replace exclude to 1 if MH came before interview date
+
+replace exclude = 1 if event_dt < interv_dt
+replace exclude = 0 if exclude==.
+replace suic_death = 0 if suic_death==.
+

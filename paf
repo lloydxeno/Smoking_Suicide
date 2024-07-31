@@ -1,0 +1,80 @@
+
+
+###Graph PAF
+library(graphPAF)
+library(haven)
+setwd("P:/Proj-19-SSH-SKY-5931_Balbuena_Sharker/WORK/Data/Analysis")
+
+cchsdat <- read_dta("cchs1_1_2014_suic_deaths_for_CMA.dta")
+cchsdat <- zap_formats(cchsdat)
+cchsdat <- zap_label(cchsdat)
+cchsdat <- zap_labels(cchsdat)
+
+cchs_males <- cchsdat[cchsdat$male==1,]
+rm(cchsdat)
+summary(cchs_males)
+
+cchs_males_clean <-data_clean(cchs_males, 
+                  vars=colnames(cchs_males[-c(1,11)]))
+rm(cchs_males)
+cchs_males_clean$weights <- NULL
+###GraphPAF
+
+cchs_males_clean$any_mh_int <- as.integer(cchs_males_clean$any_mh)
+cchs_males_clean$any_mh_int <- cchs_males_clean$any_mh_int-1
+cchs_males_clean$any_mh <- NULL
+
+mediat_mod <- glm(any_mh_int ~ ever_daily_smoker +
+                    self_rtd_hlth + FN_Met_Int + lowinc +
+                    factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+                    foreign_born + regular_drk + postsec_compl +
+                    consid_suic_lf, family = "binomial", data=cchs_males_clean)
+suic_mod <- glm(suic_death ~ ever_daily_smoker +
+                  self_rtd_hlth + FN_Met_Int + lowinc +
+                  factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+                  foreign_born + regular_drk + postsec_compl +
+                  consid_suic_lf + any_mh_int, family = "binomial", data=cchs_males_clean)
+
+males_paf <- ps_paf(response_model=suic_mod, 
+                    mediator_models=list(mediat_mod),
+                    riskfactor = "ever_daily_smoker",
+                    refval=0, data=cchs_males_clean, ci=TRUE)
+
+#################FEMALES
+
+library(graphPAF)
+library(haven)
+setwd("P:/Proj-19-SSH-SKY-5931_Balbuena_Sharker/WORK/Data/Analysis")
+
+cchsdat <- read_dta("cchs1_1_2014_suic_deaths_for_CMA.dta")
+cchsdat <- zap_formats(cchsdat)
+cchsdat <- zap_label(cchsdat)
+cchsdat <- zap_labels(cchsdat)
+
+cchs_females <- cchsdat[cchsdat$male==0,]
+rm(cchsdat)
+summary(cchs_females)
+
+
+cchs_females_clean <-data_clean(cchs_females, 
+                  vars=colnames(cchs_females[-c(1,11)]))
+rm(cchs_females)
+cchs_females_clean$weights <- NULL
+###GraphPAF
+
+
+mediat_mod <- glm(any_mh ~ ever_daily_smoker +
+                    self_rtd_hlth + FN_Met_Int + lowinc +
+                    factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+                    foreign_born + regular_drk + postsec_compl +
+                    consid_suic_lf, family = "binomial", data=cchs_females_clean)
+suic_mod <- glm(suic_death ~ ever_daily_smoker +
+                  self_rtd_hlth + FN_Met_Int + lowinc +
+                  factor(Marstat) + Has_kiddies + work_prevyr + DHH_AGE +
+                  foreign_born + regular_drk + postsec_compl +
+                  consid_suic_lf + any_mh, family = "binomial", data=cchs_females_clean)
+
+females_paf <- ps_paf(response_model=suic_mod, 
+                    mediator_models=list(mediat_mod),
+                    riskfactor = "ever_daily_smoker",
+                    refval=0, data=cchs_females_clean, ci=TRUE)

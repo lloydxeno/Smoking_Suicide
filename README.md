@@ -1,5 +1,4 @@
-This repository accompanies the paper "Daily smoking, mental health hospitalizations, and suicide deaths:
- A causal mediation analysis in a national Canadian sample" currently under review.
+This repository accompanies the paper "What is the path from cigarette smoking to suicide death? A causal mediation analysis in a national Canadian sample" currently under review.
 
 1. dataprep: This contains Stata code for creating the variables across waves of the Canadian Community Health Survey.
 2. descstats: This contains Stata code for producing descriptive statistics.

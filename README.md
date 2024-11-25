@@ -1,4 +1,4 @@
-This repository accompanies the paper Does the path from cigarette smoking to suicide death go through the hospital? A causal mediation analysis in a national Canadian sample" currently under review.
+This repository accompanies the paper "Does the path from cigarette smoking to suicide death go through the hospital? A causal mediation analysis in a national Canadian sample" currently under review.
 
 1. dataprep: This contains Stata code for creating the variables across waves of the Canadian Community Health Survey.
 2. descstats: This contains Stata code for producing descriptive statistics.

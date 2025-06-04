@@ -1,0 +1,20 @@
+library(ggplot2)
+ggplot(df_long, aes(x = interaction(variable, gender, sep = "."), y = value)) +
+  geom_point(
+    position = position_dodge(width = 0.5),
+    aes(color = gender, shape = gender),
+    size = 3
+  ) +
+  geom_errorbar(
+    aes(ymin = lower, ymax = upper, color = gender),
+    width = 0.2,
+    position = position_dodge(width = 0.5),
+    size = 1.2
+  ) +
+  labs(
+    title = "", subtitle = "",
+    y = "Odds Ratio",
+    color = "Gender", shape = "Gender"
+  ) +
+  theme_minimal() +
+  theme(axis.title.x = element_blank())
